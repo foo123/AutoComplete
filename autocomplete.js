@@ -441,7 +441,7 @@ function autoComplete( element, options )
                     val = null != item_val ? item[item_val] : item,
                     key = null != item_key ? item[item_key] : val;
                 element.value = val;
-                self.onSelect( e, term, item, selected, key, val );
+                self.onSelect( evt, term, item, selected, key, val );
                 setTimeout(function(){ removeClass(sc, 'visible'); }, 10);
             }
         }
@@ -489,9 +489,9 @@ function autoComplete( element, options )
         }
     };
 
-    var focusHandler = function( e ){
+    var focusHandler = function( evt ){
         last_val = '\n';
-        keyupHandler( e );
+        keyupHandler( evt );
     };
 
     cache_timer = setTimeout( refresh_cache, cache_refresh );
