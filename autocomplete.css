@@ -1,3 +1,14 @@
+/**
+* AutoComplete
+* https://github.com/foo123/AutoComplete
+* @version 2.0.0
+* 
+* adapted from:
+* JavaScript autoComplete v1.0.3
+* Copyright (c) 2014 Simon Steinberger / Pixabay
+* GitHub: https://github.com/Pixabay/JavaScript-autoComplete
+* License: http://www.opensource.org/licenses/mit-license.php
+**/
 .autocomplete-suggestions
 {
     text-align: left;

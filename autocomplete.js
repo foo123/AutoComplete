@@ -1,12 +1,14 @@
-/*
-    https://github.com/foo123/autocomplete
-    
-    adapted from:
-    JavaScript autoComplete v1.0.3
-    Copyright (c) 2014 Simon Steinberger / Pixabay
-    GitHub: https://github.com/Pixabay/JavaScript-autoComplete
-    License: http://www.opensource.org/licenses/mit-license.php
-*/
+/**
+* AutoComplete
+* https://github.com/foo123/AutoComplete
+* @version 2.0.0
+* 
+* adapted from:
+* JavaScript autoComplete v1.0.3
+* Copyright (c) 2014 Simon Steinberger / Pixabay
+* GitHub: https://github.com/Pixabay/JavaScript-autoComplete
+* License: http://www.opensource.org/licenses/mit-license.php
+**/
 !function( root, name, factory ) {
 "use strict";
 if ( 'object' === typeof exports )
@@ -17,12 +19,17 @@ else if ( 'function' === typeof define && define.amd )
     define(function( req ) { return factory( ); });
 else
     root[name] = factory( );
-}(this, 'autoComplete', function( undef ) {
+}(this, 'AutoComplete', function( undef ) {
 "use strict";
 
 var HAS = 'hasOwnProperty', ATTR = 'getAttribute',
     SET_ATTR = 'setAttribute', DEL_ATTR = 'removeAttribute',
-    ESC_RE = /[-\/\\^$*+?.()|[\]{}]/g,
+    esc_re = /[-\/\\^$*+?.()|[\]{}]/g,
+    trim_re = /^\s+|\s+$/g,
+    trim = String.prototype.trim
+        ? function( s ) { return s.trim(); }
+        : function( s ){ return s.replace(trim_re,''); }
+    ,
     NOW = Date.now ? Date.now : function(){ return new Date().getTime(); },
     getStyle = window.getComputedStyle ? function(el){ return getComputedStyle(el, null); } : function(el){ return el.currentStyle; };
 
@@ -36,7 +43,6 @@ function extend( o1, o2 )
     }
     return o1;
 }
-
 function dynamic( instance, properties )
 {
     // custom dynamic getter / setter for suggestions
@@ -64,12 +70,10 @@ function dynamic( instance, properties )
     }
     return instance;
 }
-
 function esc_re( s )
 {
-    return s.replace(ESC_RE, '\\$&');
+    return s.replace(esc_re, '\\$&');
 }
-
 function esc_html( s )
 {
     var esc = '', i, l = s.length, ch;
@@ -84,26 +88,14 @@ function esc_html( s )
     return esc;
 }
 
-function id( id_selector, ctx )
-{
-    return (ctx||document).getElementById( id_selector );
-}
-
-function tag( tag_selector, ctx )
-{
-    return (ctx||document).getElementsByTagName( tag_selector );
-}
-
 function $( selector, ctx )
 {
     return (ctx||document).querySelectorAll( selector );
 }
-
 function $1( selector, ctx )
 {
     return (ctx||document).querySelector( selector );
 }
-
 function create( tag, className, html )
 {
     var el = document.createElement( tag );
@@ -111,28 +103,25 @@ function create( tag, className, html )
     if ( !!html ) el.innerHTML = html;
     return el;
 }
-
 function hasClass( el, className )
 {
     return el.classList
         ? el.classList.contains(className)
-        : new RegExp('\\b'+ className+'\\b').test(el.className)
+        : -1 !== (' ' + el.className + ' ').indexOf(' ' + className + ' ')
     ;
 }
-
 function addClass( el, className )
 {
     if ( !hasClass(el, className) )
     {
         if ( el.classList ) el.classList.add(className);
-        else el.className += ' '+className;
+        else el.className = '' === el.className ? className : el.className + ' ' + className;
     }
 }
-
 function removeClass( el, className )
 {
     if ( el.classList ) el.classList.remove(className);
-    else el.className = el.className.replace(className, '');
+    else el.className = trim((' ' + el.className + ' ').replace(' ' + className + ' ', ' '));
 }
 
 function addEvent( el, type, handler )
@@ -140,14 +129,12 @@ function addEvent( el, type, handler )
     if ( el.attachEvent ) el.attachEvent( 'on'+type, handler );
     else el.addEventListener( type, handler );
 }
-
 function removeEvent( el, type, handler )
 {
     // if (el.removeEventListener) not working in IE11
     if ( el.detachEvent ) el.detachEvent( 'on'+type, handler );
     else el.removeEventListener( type, handler );
 }
-
 function live( class_selector, event, cb, ctx )
 {
     addEvent(ctx||document, event, function( e ){
@@ -193,10 +180,11 @@ function update_instances( e )
 
 var instances = [ ];
 
-function autoComplete( element, options )
+function AutoComplete( element, options )
 {
     var self = this;
-
+    if ( !(self instanceof AutoComplete) ) return new AutoComplete(element, options);
+    
     options = extend({
         // defaults
         source: 0,
@@ -284,7 +272,7 @@ function autoComplete( element, options )
         else element[DEL_ATTR]('autocomplete');
     };
     
-    var min_chars = 3, delay = 150, cache_time = 5000,
+    var min_chars = 3, delay = 150, cache_time = 5*60*1000,
         item_key = null, item_val = null,
         autocompleteAttr = element[ATTR]('autocomplete'),
         cache = { }, cache_timer = null, cache_refresh = 5*60*1000, last_val = /*element.value ||*/ '',
@@ -322,7 +310,7 @@ function autoComplete( element, options )
                 val = null != item_val ? item[item_val] : item,
                 key = null != item_key ? item[item_key] : val
             ;
-            element.value = val;
+            element.value = key;
             removeClass(sc, 'visible');
             self.onSelect( evt, term, item, selected, key, val );
         }
@@ -406,7 +394,7 @@ function autoComplete( element, options )
                 {
                     removeClass(selected, 'selected');
                     addClass(next, 'selected');
-                    element.value = null !== item_val ? cache[sc._term][next._index][item_val] : cache[sc._term][next._index];
+                    element.value = null != item_key ? cache[sc._term][next._index][item_key] : (null != item_val ? cache[sc._term][next._index][item_val] : cache[sc._term][next._index]);
                 }
                 else
                 {
@@ -420,7 +408,7 @@ function autoComplete( element, options )
                 // first : last
                 next = (40 === key) ? $1('.autocomplete-suggestion', sc) : sc.children[sc.children.length - 1];
                 addClass(next, 'selected');
-                element.value = null != item_val ? cache[sc._term][next._index][item_val] : cache[sc._term][next._index];
+                element.value = null != item_key ? cache[sc._term][next._index][item_key] : (null != item_val ? cache[sc._term][next._index][item_val] : cache[sc._term][next._index]);
             }
             updateSC( element, sc, 0, next );
             return false;
@@ -440,7 +428,7 @@ function autoComplete( element, options )
                 var term = sc._term, item = cache[term][selected._index],
                     val = null != item_val ? item[item_val] : item,
                     key = null != item_key ? item[item_key] : val;
-                element.value = val;
+                element.value = key;
                 self.onSelect( evt, term, item, selected, key, val );
                 setTimeout(function(){ removeClass(sc, 'visible'); }, 10);
             }
@@ -502,6 +490,7 @@ function autoComplete( element, options )
     if ( !instances.length ) addEvent(window, 'resize', update_instances);
     instances.push( self );
 }
+AutoComplete.VERSION = '2.0.0';
 
-return autoComplete;
+return AutoComplete;
 });
