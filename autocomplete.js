@@ -24,7 +24,7 @@ else
 
 var HAS = 'hasOwnProperty', ATTR = 'getAttribute',
     SET_ATTR = 'setAttribute', DEL_ATTR = 'removeAttribute',
-    esc_re = /[-\/\\^$*+?.()|[\]{}]/g,
+    escaped_re = /[-\/\\^$*+?.()|[\]{}]/g,
     trim_re = /^\s+|\s+$/g,
     trim = String.prototype.trim
         ? function( s ) { return s.trim(); }
@@ -72,7 +72,7 @@ function dynamic( instance, properties )
 }
 function esc_re( s )
 {
-    return s.replace(esc_re, '\\$&');
+    return s.replace(escaped_re, '\\$&');
 }
 function esc_html( s )
 {

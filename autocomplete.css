@@ -65,6 +65,8 @@
 {
     font-weight: bold;
     color: #1f8dd6;
+    display: inline;
+    margin: 0; padding: 0;
 }
 .autocomplete-suggestion.selected
 {
@@ -87,5 +89,5 @@
     font-style: italic;
     opacity: 0.6;
     color: inherit;
-    font-size: 1.6em;
+    font-size: 1.2em;
 }
